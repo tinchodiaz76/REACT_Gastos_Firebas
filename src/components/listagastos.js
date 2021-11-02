@@ -44,42 +44,6 @@ const columns = [
     */
   ];
 
-  const rows = [
-    {id: 1, titulo: 'Snow', nombre: 'Jon', monto: 35, fecha: '02/11/2021' },
-    {id: 2, titulo: 'Lannister', nombre: 'Cersei', monto: 42, fecha: '02/11/2021' },
-    {id: 3, titulo: 'Lannister', nombre: 'Jaime', monto: 45, fecha: '02/11/2021' },
-    {id: 4, titulo: 'Stark', nombre: 'Arya', monto: 16, fecha: '02/11/2021' },
-    {id: 5, titulo: 'Targaryen', nombre: 'Daenerys', monto: 20, fecha: '02/11/2021' },
-    {id: 6, titulo: 'Melisandre', nombre: null, monto: 150, fecha: '02/11/2021' },
-    {id: 7, titulo: 'Clifford', nombre: 'Ferrara', monto: 44, fecha: '02/11/2021' },
-    {id: 8, titulo: 'Frances', nombre: 'Rossini', monto: 36, fecha: '02/11/2021' },
-    {id: 9, titulo: 'Roxie', nombre: 'Harvey', monto: 65, fecha: '02/11/2021' },
-  ];
-
-  var pedro= {titulo:'',nombre:'',monto:'',fecha:''};
-
-/*
-const addorEditGastos = async () => {
-
-    console.log("gastosParticular=", gastosParticular)
-    
-    try {
-            const docRef = await addDoc(collection(db, "gastos"), gastosParticular);
-            //console.log("Document written with ID: ", docRef.id);
-            window.alert("Document written with ID: ", docRef.id);
-        } catch (e) {
-            console.error("Error adding document: ", e);
-        }
-
-    //Leer documentos
-    //const citiesCol = collection(db, 'cities');
-    //const citySnapshot = await getDocs(citiesCol);
-    //const cityList = citySnapshot.docs.map(doc => doc.data());
-    //return cityList;
-    //FIN Leer documentos
-    
-}
-*/
 
 const Listagastos= ()=> {
 
