@@ -1,0 +1,6 @@
+1.-
+npm install @material-ui/core --save
+npm install @mui/x-data-grid --save
+npm i react-uuid --save
+
+
