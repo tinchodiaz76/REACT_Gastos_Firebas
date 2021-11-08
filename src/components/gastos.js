@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState}  from "react";
+
 /*import 'date-fns';*/
 import db from "../firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
 import {TextField,Button} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+
+import {useDispatch, useSelector} from 'react-redux';
+import {guardarGastos,totalizarGastos, InsertaDatosLeidos} from '../redux/gastosDucks';
+import store  from '../redux/store';
 
 import uuid from 'react-uuid'
 
@@ -27,28 +32,71 @@ import uuid from 'react-uuid'
 
 const Gastos= () =>{
 
+    const dispatch = useDispatch();
+    
+    const gastos_puro=useSelector(store=>store);
+/*    
+    console.log("gastos_puro=", gastos_puro);
+*/    
+    const gastos=useSelector(store=>store.gastosRedux.gastos); //EL store, apunta al unico reducer declarado "gastosRedux" y gastosRedux apunta al reducer gastosReducer
+                                                                //y gastosReducer esta definido en el archivo gastosDucks.js
+/*
+    console.log("gastos=", gastos);
+*/
+    const totalizo=useSelector(store=>store.gastosRedux.total);
+/*
+    console.log("totalizo=", totalizo);
+*/
     const classes = useStyles();
 
-    const[gastosParticular, setGastos]= useState({id:uuid(), titulo:'', nombre:'',monto:'', fecha:''});
+    const[gastosParticular, setGastosParticulares]= useState({id:uuid(), titulo:'', nombre:'',monto:'0', fecha:''});
+    /*const[gastosParticular, setGastosParticulares]= useState([]);*/
+
+    const[gastosLeidos, setGastosLeidos]=useState([]);
+
+
+    useEffect( async () => {
+        //Leer documentos
+        const citiesCol = collection(db, 'gastos');
+        const citySnapshot = await getDocs(citiesCol);
+  
+        console.log("citySnapshot.docs.map(doc => doc.data())=", citySnapshot.docs.map(doc => doc.data()));
+
+        setGastosLeidos(citySnapshot.docs.map(doc => doc.data()));
+
+         //Leo los gastos de la BD
+        /* dispatch(InsertaDatosLeidos(gastosLeidos)); // No llega a completar gastosLeidos....por eso lo invoco en addorEditGastos*/
+      },[]);
+
 
     const handleonChange = (e) =>{
 
         e.preventDefault();
-        console.log("En handleonChange ");
-
-        console.log("e.target.name=", e.target.name);
-        
-        console.log("e.target.value=", e.target.value);
-
-        setGastos({...gastosParticular,[e.target.name] : e.target.value});
+        setGastosParticulares({...gastosParticular,[e.target.name] : e.target.value});
     }
 
     const addorEditGastos = async () => {
 
         try {
-                const docRef = await addDoc(collection(db, "gastos"), gastosParticular);
-                /*console.log("Document written with ID: ", docRef.id);*/
+
+            console.log("gastosLeidos=",gastosLeidos); 
+            console.log("gastosLeidos.lenght=", gastosLeidos.length);
+/*
+                if (gastosLeidos.length>0)
+                {
+                dispatch(guardarGastos(gastosLeidos));
+                }
+*/                
+                const docRef = await addDoc(collection(db, "gastos"), gastosParticular); //Guardo en la Base de Datos
                 window.alert("Document written with ID: ", docRef.id);
+                //Guardo en el STORE
+
+                setGastosParticulares(gastosParticular);
+
+                dispatch(guardarGastos(gastosParticular));
+/*
+                dispatch(totalizarGastos());
+*/
             } catch (e) {
                 console.error("Error adding document: ", e);
             }
@@ -89,9 +137,11 @@ const Gastos= () =>{
             Enviar
         </Button>
 
-        <Button variant="contained" color="secondary">
+        <Button variant="contained" color="secondary" onClick={()=> dispatch(totalizarGastos())}>
             Totalizar
         </Button>
+
+        <h1>Total: {totalizo}</h1>
 
         </>
         
