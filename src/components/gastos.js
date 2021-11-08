@@ -11,7 +11,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {guardarGastos,totalizarGastos, InsertaDatosLeidos} from '../redux/gastosDucks';
 import store  from '../redux/store';
 
-import uuid from 'react-uuid'
+import uuid from "react-uuid"
+import Listagastos from "./listagastos";
 
     const useStyles = makeStyles((theme) => ({
         root: {
@@ -30,8 +31,26 @@ import uuid from 'react-uuid'
         },
     }));
 
-const Gastos= () =>{
 
+    const Gastos= ({AgregarGasto}) =>{
+
+        const initialStateValue= {id:'', titulo:'', nombre:'',monto:'0', fecha:''}
+/*
+    //Se va a ejecutar al inicio de la sesion, porque tiene esto [] como parametro
+    useEffect(() => {
+        //Leo lo que tiene Firebase
+        LecturaFireBase();
+      },[]);
+
+*/
+/*
+    const LecturaFireBase= async () =>{
+        const citiesCol = collection(db, 'gastos');
+        const citySnapshot = await getDocs(citiesCol);
+
+        setGastosLeidos(citySnapshot.docs.map(doc => doc.data()));
+    };
+*/
     const dispatch = useDispatch();
     
     const gastos_puro=useSelector(store=>store);
@@ -43,31 +62,11 @@ const Gastos= () =>{
 /*
     console.log("gastos=", gastos);
 */
-    const totalizo=useSelector(store=>store.gastosRedux.total);
-/*
-    console.log("totalizo=", totalizo);
-*/
+
     const classes = useStyles();
 
-    const[gastosParticular, setGastosParticulares]= useState({id:uuid(), titulo:'', nombre:'',monto:'0', fecha:''});
+    const[gastosParticular, setGastosParticulares]= useState(initialStateValue);
     /*const[gastosParticular, setGastosParticulares]= useState([]);*/
-
-    const[gastosLeidos, setGastosLeidos]=useState([]);
-
-
-    useEffect( async () => {
-        //Leer documentos
-        const citiesCol = collection(db, 'gastos');
-        const citySnapshot = await getDocs(citiesCol);
-  
-        console.log("citySnapshot.docs.map(doc => doc.data())=", citySnapshot.docs.map(doc => doc.data()));
-
-        setGastosLeidos(citySnapshot.docs.map(doc => doc.data()));
-
-         //Leo los gastos de la BD
-        /* dispatch(InsertaDatosLeidos(gastosLeidos)); // No llega a completar gastosLeidos....por eso lo invoco en addorEditGastos*/
-      },[]);
-
 
     const handleonChange = (e) =>{
 
@@ -75,46 +74,45 @@ const Gastos= () =>{
         setGastosParticulares({...gastosParticular,[e.target.name] : e.target.value});
     }
 
-    const addorEditGastos = async () => {
+    const NewGasto = async () => {
 
+        AgregarGasto({...gastosParticular, id:uuid()});
+
+        setGastosParticulares({...initialStateValue});
+
+        /*
         try {
-
-            console.log("gastosLeidos=",gastosLeidos); 
-            console.log("gastosLeidos.lenght=", gastosLeidos.length);
-/*
-                if (gastosLeidos.length>0)
-                {
-                dispatch(guardarGastos(gastosLeidos));
-                }
-*/                
+                //Guardo en Firebase
                 const docRef = await addDoc(collection(db, "gastos"), gastosParticular); //Guardo en la Base de Datos
-                window.alert("Document written with ID: ", docRef.id);
-                //Guardo en el STORE
+                window.alert("Se agrego a la lista a "+ gastosParticular.nombre + "!!");
 
                 setGastosParticulares(gastosParticular);
 
+                //Guardo en Store
                 dispatch(guardarGastos(gastosParticular));
-/*
-                dispatch(totalizarGastos());
-*/
+
+                //Firebase cambio, vuelvo a leer lo que tiene Firebase
+          
             } catch (e) {
                 console.error("Error adding document: ", e);
             }
+*/            
         
     }
+
 
     return (
         <>
           <h1>App de Gastos</h1>
-          <form className={classes.root} noValidate autoComplete="off">
+            <form className={classes.root} noValidate autoComplete="off">
                 <div>
-                    <TextField required id="standard-required" label="Titulo" defaultValue="" name="titulo" onChange={handleonChange} />
+                    <TextField required id="standard-required" label="Titulo" defaultValue="" name="titulo" onChange={handleonChange} value={gastosParticular.titulo}/>
                 </div>
                 <div>    
-                    <TextField required id="standard-required" label="Nombre" defaultValue="" name="nombre" onChange={handleonChange} />
+                    <TextField required id="standard-required" label="Nombre" defaultValue="" name="nombre" onChange={handleonChange} value={gastosParticular.nombre}/>
                 </div>
                 <div>
-                    <TextField required id="standard-required" label="Monto" defaultValue="" name="monto" onChange={handleonChange} />
+                    <TextField required id="standard-required" label="Monto" defaultValue="" name="monto" onChange={handleonChange} value={gastosParticular.monto}/>
                 </div>
                 <div>
                     <TextField
@@ -126,25 +124,17 @@ const Gastos= () =>{
                         className={classes.textField}
                         onChange={handleonChange}
                         InputLabelProps={{
-                        shrink: true,
+                        shrink: true
                         }}
                     />
                 </div>
+            </form>
 
-                </form>
-
-        <Button variant="contained" color="primary" onClick={()=>addorEditGastos()}>
-            Enviar
-        </Button>
-
-        <Button variant="contained" color="secondary" onClick={()=> dispatch(totalizarGastos())}>
-            Totalizar
-        </Button>
-
-        <h1>Total: {totalizo}</h1>
-
-        </>
+            <Button variant="contained" color="primary" onClick={()=>NewGasto()}>
+                Enviar
+            </Button>
         
+       </>
         
     )
 }
