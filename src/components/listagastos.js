@@ -1,26 +1,9 @@
 import React, { useEffect, useState}  from "react";
 
-//Se usa para la BD
-import db from "../firebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-
-import {useDispatch, useSelector} from 'react-redux';
-import {guardarGastos, totalizarGastos} from '../redux/gastosDucks';
-import store  from '../redux/store';
-
-//Componente de Material UI
-import {TextField,Button, ClickAwayListener} from '@material-ui/core';
+import {TextField,Button, ClickAwayListener,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Paper} from '@material-ui/core';
 //import { DataGrid } from '@mui/x-data-grid';
 //Estilos de Material UI
 import { makeStyles } from '@material-ui/core/styles';
-
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
 
 
 //Modal deBoostrap
@@ -30,10 +13,8 @@ import ModalHeader from "react-bootstrap/ModalHeader";
 import ModalFooter from "react-bootstrap/ModalFooter";
 import ModalTitle from "react-bootstrap/ModalTitle";
 
-//Genera un identificador
-import uuid from 'react-uuid'
 
-  const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
     root: {
     '& .MuiTextField-root': {
         margin: theme.spacing(1),
@@ -50,84 +31,31 @@ import uuid from 'react-uuid'
     },
 }));
 
-
-const Listagastos= ({setGastosLeidos,gastosLeidos,TotalGastos,totalizo})=> {
-  
-    //Se va a ejecutar al inicio de la sesion, porque tiene esto [] como parametro
-    useEffect(() => {
-        //Leo lo que tiene Firebase
-        LecturaFireBase();
-      },[]);
-
-    const LecturaFireBase= async () =>{
-        const citiesCol = collection(db, 'gastos');
-        const citySnapshot = await getDocs(citiesCol);
-
-        setGastosLeidos(citySnapshot.docs.map(doc => doc.data()));
-    };
-
-/*
-  useEffect(() => {
-    //Leo lo que tiene Firebase
-    TotalGastos();
-  },[]);
-*/
+const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=> {
 
     const classes = useStyles();
 
-    const dispatch = useDispatch();
-      
-    const gastos_puro=useSelector(store=>store);
-    //console.log("gastos_puro=", gastos_puro);
-    
-    const gastos=useSelector(store=>store.gastosRedux.gastos); //EL store, apunta al unico reducer declarado "gastosRedux" y gastosRedux apunta al reducer gastosReducer
-    //y gastosReducer esta definido en el archivo gastosDucks.js
-    //console.log("gastos=", gastos);
-
-    //const totalizo=useSelector(store=>store.gastosRedux.total);
-
-    //console.log("totalizo=", totalizo);
-
-    const[gastosParticular, setGastosParticulares]= useState({id:uuid(), titulo:'', nombre:'',monto:'0', fecha:''});
-
-    /*const [rowGastos,setRowGastos] = useState([]);*/
-        
     //Se usa para el MODAL
     const [show, setShow] = useState(false);
     //Se usa para el MODAL
     const handleClose = () => setShow(false);
     //Se usa para el MODAL
     const handleShow = () => setShow(true);
-
+    //Se usa para el MODAL
     const handleonChange = (e) =>{
-      e.preventDefault();
-      setGastosParticulares({...gastosParticular,[e.target.name] : e.target.value});
-    }
-
-    const AgregarParticipante= async ()=>{
-      console.log("gastosParticular=", gastosParticular);
-
-      const docRef = await addDoc(collection(db, "gastos"), gastosParticular); //Guardo en la Base de Datos
-    
-      dispatch(guardarGastos(gastosParticular));
-      
-      window.alert("Se agrego el Participante");
-
-      setShow(false);
-    }
+        e.preventDefault();
+        /*
+        setGastosParticulares({...gastosParticular,[e.target.name] : e.target.value});
+        */
+      }
 
     return (
         <>
-   
-         <div>
-         <Button variant="contained" color="primary" onClick={handleShow}>
-            Agregar Participante
-        </Button>
-        </div>
-
-        <h1>El total es {totalizo}</h1>
-
-        <div>
+            <h1>Listado de Gastos</h1>
+            <h2>Total: {MostrarTotal}</h2>
+            <h2>Cantidad de Personas: {CantPersonas}</h2>
+            <h2>Total por Persona: {TotalPorPersona}</h2>
+            <div>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
@@ -136,10 +64,11 @@ const Listagastos= ({setGastosLeidos,gastosLeidos,TotalGastos,totalizo})=> {
                     <TableCell align="right">Nombre</TableCell>
                     <TableCell align="right">Monto</TableCell>
                     <TableCell align="right">Fecha</TableCell>
+                    <TableCell align="right">Adeuda</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {gastosLeidos.map((row) => (
+                  {MostrarGastos.map((row) => (
                     <TableRow
                       key={row.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -150,6 +79,7 @@ const Listagastos= ({setGastosLeidos,gastosLeidos,TotalGastos,totalizo})=> {
                       <TableCell align="right">{row.nombre}</TableCell>
                       <TableCell align="right">{row.monto}</TableCell>
                       <TableCell align="right">{row.fecha}</TableCell>
+                      <TableCell align="right">0</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -157,8 +87,7 @@ const Listagastos= ({setGastosLeidos,gastosLeidos,TotalGastos,totalizo})=> {
             </TableContainer>
         </div>
         
-
-        
+               
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
               <Modal.Title>Agregar Participante</Modal.Title>
@@ -194,15 +123,17 @@ const Listagastos= ({setGastosLeidos,gastosLeidos,TotalGastos,totalizo})=> {
               <Button variant="secondary" onClick={handleClose}>
                 Cerrar
               </Button>
-              <Button variant="primary" onClick={AgregarParticipante}>
+              <Button variant="primary">
                 Agregar
               </Button>
             </Modal.Footer>
         </Modal>
 
-        </>
-      );
 
+            {/*MostrarGastos.map((item)=>(item.nombre))*/}
+        </>
+
+    );
 }
 
 export default Listagastos;

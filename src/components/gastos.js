@@ -118,7 +118,7 @@ import Listagastos from "./listagastos";
                     <TextField
                         id="date"
                         name="fecha"
-                        label="Birthday"
+                        label="Fecha"
                         type="date"
                         defaultValue=""
                         className={classes.textField}
