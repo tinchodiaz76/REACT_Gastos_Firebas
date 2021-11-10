@@ -12,7 +12,15 @@ import ModalBody from "react-bootstrap/ModalBody";
 import ModalHeader from "react-bootstrap/ModalHeader";
 import ModalFooter from "react-bootstrap/ModalFooter";
 import ModalTitle from "react-bootstrap/ModalTitle";
+//@material-ui/icons/Delete,
+import { Delete, AccessAlarm, ThreeDRotation, HourglassEmpty } from '@material-ui/icons';
 
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
+import db from "../firebase";
+//import { collection, addDoc, getDocs, deleteDoc } from "firebase/firestore";
+
+import { doc, getDoc, deleteDoc, collection, query, where, getDocs} from "firebase/firestore";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -31,8 +39,15 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=> {
+const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, EliminoRegistro, GraboRegistro})=> {
 
+    const[titulo, setTitulo]= useState("");
+    const[nombre, setNombre]= useState("");
+    const[monto, setMonto]= useState("");
+    const[fecha, setFecha]= useState("");
+    const[id, setId]= useState("");
+
+    
     const classes = useStyles();
 
     //Se usa para el MODAL
@@ -49,9 +64,35 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=
         */
       }
 
+    const valorIndividual =(monto)=>{
+          return (monto - TotalPorPersona);
+    }
+
+    const EditRegister = (registro) =>{
+
+      setId(registro.id);
+      setTitulo(registro.titulo);
+      setNombre(registro.nombre);
+      setMonto(registro.monto);
+      setFecha(registro.fecha);
+      
+
+      setShow(true);
+    }
+
+    const DeleteRegister= (registro)=>{
+      if (window.confirm("Esta seguro de que desea eliminar a "+ registro.nombre))
+      {
+          EliminoRegistro(registro.id);
+      }
+    }
+
+    const SaveRegister = (id)=>{
+         GraboRegistro(id);
+    }
+
     return (
         <>
-            <h1>Listado de Gastos</h1>
             <h2>Total: {MostrarTotal}</h2>
             <h2>Cantidad de Personas: {CantPersonas}</h2>
             <h2>Total por Persona: {TotalPorPersona}</h2>
@@ -65,6 +106,8 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=
                     <TableCell align="right">Monto</TableCell>
                     <TableCell align="right">Fecha</TableCell>
                     <TableCell align="right">Adeuda</TableCell>
+                    <TableCell align="right">Editar</TableCell>
+                    <TableCell align="right">Eliminar</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -79,7 +122,9 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=
                       <TableCell align="right">{row.nombre}</TableCell>
                       <TableCell align="right">{row.monto}</TableCell>
                       <TableCell align="right">{row.fecha}</TableCell>
-                      <TableCell align="right">0</TableCell>
+                      <TableCell align="right">{valorIndividual(row.monto)}</TableCell>
+                      <TableCell align="right"><EditIcon onClick={()=>EditRegister(row)} /></TableCell>
+                      <TableCell align="right"><DeleteIcon onClick={()=>DeleteRegister(row)}/></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -95,13 +140,17 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=
             <Modal.Body>
                 <form className={classes.root} noValidate autoComplete="off">
                     <div>
-                        <TextField required id="standard-required" label="Titulo" defaultValue="" name="titulo" onChange={handleonChange} />
+                        <TextField required id="standard-required" label="IDs"  name="id" defaultValue={id} onChange={handleonChange}/>
+                    </div>
+
+                    <div>
+                        <TextField required id="standard-required" label="Titulo"  name="titulo" defaultValue={titulo} onChange={handleonChange}/>
                     </div>
                     <div>    
-                        <TextField required id="standard-required" label="Nombre" defaultValue="" name="nombre" onChange={handleonChange} />
+                        <TextField required id="standard-required" label="Nombre" defaultValue="" name="nombre"  defaultValue={nombre} onChange={handleonChange} />
                     </div>
                     <div>
-                        <TextField required id="standard-required" label="Monto" defaultValue="" name="monto" onChange={handleonChange} />
+                        <TextField required id="standard-required" label="Monto" defaultValue="" name="monto" defaultValue={monto} onChange={handleonChange} />
                     </div>
                     <div>
                         <TextField
@@ -109,7 +158,7 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=
                             name="fecha"
                             label="Birthday"
                             type="date"
-                            defaultValue=""
+                            defaultValue={fecha}
                             className={classes.textField}
                             onChange={handleonChange}
                             InputLabelProps={{
@@ -123,8 +172,8 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=
               <Button variant="secondary" onClick={handleClose}>
                 Cerrar
               </Button>
-              <Button variant="primary">
-                Agregar
+              <Button variant="primary" onClick={SaveRegister({id})}>
+                Grabar
               </Button>
             </Modal.Footer>
         </Modal>
@@ -136,4 +185,4 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona})=
     );
 }
 
-export default Listagastos;
+export default Listagastos;;

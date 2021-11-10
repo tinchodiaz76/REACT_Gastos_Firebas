@@ -28,6 +28,7 @@ export default function gastosReducer (state= initialValues, action){
             
             return {...state, gastos:[...state.gastos,action.payload.gastosLeidos]};
 */
+/*
         case TOTALIZAR:
 
             var array_montos= state.gastos.map(function (task) {
@@ -47,7 +48,7 @@ export default function gastosReducer (state= initialValues, action){
             return {...state, total:totalizo };
 
             ///*const reduced = state.gastos.reduce((prev, next) => prev + next, 0);
-
+*/
         default:
             return state
     };
@@ -74,9 +75,11 @@ export const InsertaDatosLeidos =(gastos_pi) => async (dispatch,getState)=> {
     });
 };
 
+/*
 export const totalizarGastos =()=> async  (dispatch, getState)=>{
     dispatch({
         type: TOTALIZAR
     });
-/*  console.log("totalizarGastos...getState().gastos-2=", getState().total)*/
+//  console.log("totalizarGastos...getState().gastos-2=", getState().total)
 }
+*/
