@@ -41,12 +41,13 @@ const useStyles = makeStyles((theme) => ({
 
 const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, EliminoRegistro, GraboRegistro})=> {
 
+    const[id, setId]= useState("");
     const[titulo, setTitulo]= useState("");
     const[nombre, setNombre]= useState("");
     const[monto, setMonto]= useState("");
     const[fecha, setFecha]= useState("");
-    const[id, setId]= useState("");
 
+    const[gastomodificado,setGastoModificado]=useState([]);
     
     const classes = useStyles();
 
@@ -57,11 +58,12 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
     //Se usa para el MODAL
     const handleShow = () => setShow(true);
     //Se usa para el MODAL
+
     const handleonChange = (e) =>{
         e.preventDefault();
-        /*
-        setGastosParticulares({...gastosParticular,[e.target.name] : e.target.value});
-        */
+        
+        setGastoModificado({...gastomodificado,[e.target.name] : e.target.value});
+        
       }
 
     const valorIndividual =(monto)=>{
@@ -70,14 +72,11 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
 
     const EditRegister = (registro) =>{
 
-      setId(registro.id);
-      setTitulo(registro.titulo);
-      setNombre(registro.nombre);
-      setMonto(registro.monto);
-      setFecha(registro.fecha);
-      
+      setGastoModificado({...gastomodificado,id:registro.id, titulo:registro.titulo, nombre:registro.nombre, monto:registro.monto, fecha:registro.fecha});
 
-      setShow(true);
+      console.log("gastomodificado=", gastomodificado);
+
+      handleShow(); //Muestra el Modal
     }
 
     const DeleteRegister= (registro)=>{
@@ -87,8 +86,9 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
       }
     }
 
-    const SaveRegister = (id)=>{
-         GraboRegistro(id);
+    const SaveRegister = ()=>{
+      GraboRegistro(gastomodificado);
+      handleClose();  //Cierro el Modal
     }
 
     return (
@@ -140,17 +140,17 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
             <Modal.Body>
                 <form className={classes.root} noValidate autoComplete="off">
                     <div>
-                        <TextField required id="standard-required" label="IDs"  name="id" defaultValue={id} onChange={handleonChange}/>
+                        <TextField required id="standard-required" label="IDs"  name="id" defaultValue={gastomodificado.id} onChange={handleonChange} hidden/>
                     </div>
 
                     <div>
-                        <TextField required id="standard-required" label="Titulo"  name="titulo" defaultValue={titulo} onChange={handleonChange}/>
+                        <TextField required id="standard-required" label="Titulo"  name="titulo" defaultValue={gastomodificado.titulo} onChange={handleonChange}/>
                     </div>
                     <div>    
-                        <TextField required id="standard-required" label="Nombre" defaultValue="" name="nombre"  defaultValue={nombre} onChange={handleonChange} />
+                        <TextField required id="standard-required" label="Nombre"  name="nombre"  defaultValue={gastomodificado.nombre} onChange={handleonChange} />
                     </div>
                     <div>
-                        <TextField required id="standard-required" label="Monto" defaultValue="" name="monto" defaultValue={monto} onChange={handleonChange} />
+                        <TextField required id="standard-required" label="Monto" name="monto" defaultValue={gastomodificado.monto} onChange={handleonChange} />
                     </div>
                     <div>
                         <TextField
@@ -158,7 +158,7 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
                             name="fecha"
                             label="Birthday"
                             type="date"
-                            defaultValue={fecha}
+                            defaultValue={gastomodificado.fecha}
                             className={classes.textField}
                             onChange={handleonChange}
                             InputLabelProps={{
@@ -169,17 +169,14 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
                 </form>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
+              <Button variant="secondary" onClick={()=>handleClose}>
                 Cerrar
               </Button>
-              <Button variant="primary" onClick={SaveRegister({id})}>
+              <Button variant="primary" onClick={()=>SaveRegister()}>
                 Grabar
               </Button>
             </Modal.Footer>
         </Modal>
-
-
-            {/*MostrarGastos.map((item)=>(item.nombre))*/}
         </>
 
     );

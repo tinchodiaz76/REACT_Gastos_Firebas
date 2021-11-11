@@ -3,7 +3,7 @@ import React, { useEffect, useState}  from "react";
 import Gastos from "./gastos";
 
 import db from "../firebase";
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc,updateDoc  } from "firebase/firestore";
 import Listagastos from "./listagastos";
 import { ContactsOutlined } from "@material-ui/icons";
 
@@ -106,8 +106,28 @@ const Globalcomponente= () =>{
         LecturaFireBase();
     }
     
-    const modifyregister =async (id)=> {
-        console.log("modifyregister.id=", id);
+    const modifyregister =async (registro)=> {
+        var v_id='';
+        console.log("modifyregister-registro=", registro.id);
+ 
+        const q = query(collection(db, "gastos"), where("id", "==", registro.id));
+
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach((doc) => {
+            console.log(doc.id, " => ", doc.data());
+            v_id= doc.id;  //Si ponia deleteDoc(doc(db, "gastos", v_id)); no andaba.
+        })
+
+
+        await updateDoc(doc(db, "gastos", v_id),{
+            titulo: registro.titulo,
+            nombre: registro.nombre,
+            monto: registro.monto,
+            fecha: registro.fecha,
+          });
+
+          LecturaFireBase();
     }
     
     return(
