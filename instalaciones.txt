@@ -3,7 +3,6 @@ npm install @material-ui/core --save
 npm install @material-ui/core/paper --save
 npm install @mui/x-data-grid --save
 npm install @material-ui/icons --save
-npm install @material-ui/pickers --save
 npm i react-uuid --save
 npm i axios
 npm i react-redux

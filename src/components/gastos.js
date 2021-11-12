@@ -38,7 +38,8 @@ const Gastos= ({AgregarGasto}) =>{
                             .min(3,"El Nombre debe tener como minimo 2 caracteres")
                             .max(40,"El Nombre debe tener menos de 40 caracteres"),
         monto: yup.number().required("Por favor ingresa el Monto")
-                            .min(3,"El Monto debe tener como minimo 2 caracteres"),
+                            .min(1,"El Monto no debe ser menor a $1")
+                            .max(99999,"El Monto no debe ser superior a $99999"),
         fecha: yup.date().required("Por favor ingresa la Fecha")
     });
 
@@ -50,13 +51,6 @@ const Gastos= ({AgregarGasto}) =>{
     monto: "",
     fecha:"",
     };
-
-
-/*
-    const onSubmit = (values) => {
-    alert(JSON.stringify(values, null, 2));
-    };
-*/
 
     const[gastosParticular, setGastosParticulares]= useState(initialValues);
     /*const[gastosParticular, setGastosParticulares]= useState([]);*/
@@ -74,9 +68,10 @@ const Gastos= ({AgregarGasto}) =>{
                     // same shape as initial values
                     console.log("Se envia", values);
 
-                    console.log("gastosParticular.fecha=",gastosParticular.fecha);
 
                     AgregarGasto({...values, id:uuid()});
+
+                    //values= initialValues;
 
                     setGastosParticulares({...initialValues});
                   }}
@@ -89,7 +84,8 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="text"
                         name="titulo"
-                        //value={gastosParticular.titulo}
+                        //defaultValue={gastosParticular.titulo}
+                        //onChange={handleonChange}
                         placeholder="Ingresa el Titulo del Evento"
                         className={`form-control ${
                             touched.titulo && errors.titulo ? "is-invalid" : ""
@@ -107,7 +103,7 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="text"
                         name="nombre"
-                        //value={gastosParticular.nombre}
+                        //defaultValue={gastosParticular.nombre}
                         placeholder="Ingresa el Nombre"
                         className={`form-control ${
                             touched.nombre && errors.nombre ? "is-invalid" : ""
@@ -125,7 +121,7 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="number"
                         name="monto"
-                        //value={gastosParticular.monto}
+                        //defaultValue={gastosParticular.monto}
                         placeholder="Ingresa el Monto"
                         className={`form-control ${
                             touched.monto && errors.monto ? "is-invalid" : ""
@@ -143,8 +139,7 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="date"
                         name="fecha"
-                        defaultValue="2017-05-24"
-                        //value={gastosParticular.monto}
+                        //defaultValue={gastosParticular.fecha}
                         InputLabelProps={{
                             shrink: true,
                           }}
