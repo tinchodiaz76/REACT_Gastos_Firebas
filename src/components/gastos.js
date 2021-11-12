@@ -1,20 +1,14 @@
 import React, { useEffect, useState}  from "react";
-
-/*import 'date-fns';*/
-import db from "../firebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-
 import {TextField,Button} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
-import {useDispatch, useSelector} from 'react-redux';
-import {guardarGastos,totalizarGastos, InsertaDatosLeidos} from '../redux/gastosDucks';
-import store  from '../redux/store';
 
 import uuid from "react-uuid"
-import Listagastos from "./listagastos";
 
-    const useStyles = makeStyles((theme) => ({
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as yup from 'yup'
+
+const useStyles = makeStyles((theme) => ({
         root: {
         '& .MuiTextField-root': {
             margin: theme.spacing(1),
@@ -29,114 +23,150 @@ import Listagastos from "./listagastos";
             width: 200,
           },
         },
-    }));
+}));
 
 
-    const Gastos= ({AgregarGasto}) =>{
-
-        const initialStateValue= {id:'', titulo:'', nombre:'',monto:'0', fecha:''}
-/*
-    //Se va a ejecutar al inicio de la sesion, porque tiene esto [] como parametro
-    useEffect(() => {
-        //Leo lo que tiene Firebase
-        LecturaFireBase();
-      },[]);
-
-*/
-/*
-    const LecturaFireBase= async () =>{
-        const citiesCol = collection(db, 'gastos');
-        const citySnapshot = await getDocs(citiesCol);
-
-        setGastosLeidos(citySnapshot.docs.map(doc => doc.data()));
-    };
-*/
-    const dispatch = useDispatch();
-    
-    const gastos_puro=useSelector(store=>store);
-/*    
-    console.log("gastos_puro=", gastos_puro);
-*/    
-    const gastos=useSelector(store=>store.gastosRedux.gastos); //EL store, apunta al unico reducer declarado "gastosRedux" y gastosRedux apunta al reducer gastosReducer
-                                                                //y gastosReducer esta definido en el archivo gastosDucks.js
-/*
-    console.log("gastos=", gastos);
-*/
+const Gastos= ({AgregarGasto}) =>{
 
     const classes = useStyles();
 
-    const[gastosParticular, setGastosParticulares]= useState(initialStateValue);
+    const validationSchema = yup.object().shape({
+        titulo: yup.string().required("Por favor ingresa el Titulo")
+                            .min(3,"El Titulo debe tener como minimo 2 caracteres")
+                            .max(20,"El Titulo debe tener menos de 20 caracteres"),
+        nombre: yup.string().required("Por favor ingresa el Nombre")
+                            .min(3,"El Nombre debe tener como minimo 2 caracteres")
+                            .max(40,"El Nombre debe tener menos de 40 caracteres"),
+        monto: yup.number().required("Por favor ingresa el Monto")
+                            .min(3,"El Monto debe tener como minimo 2 caracteres"),
+        fecha: yup.date().required("Por favor ingresa la Fecha")
+    });
+
+
+    const initialValues = {
+    id: "",
+    titulo: "",
+    nombre: "",
+    monto: "",
+    fecha:"",
+    };
+
+
+/*
+    const onSubmit = (values) => {
+    alert(JSON.stringify(values, null, 2));
+    };
+*/
+
+    const[gastosParticular, setGastosParticulares]= useState(initialValues);
     /*const[gastosParticular, setGastosParticulares]= useState([]);*/
 
     const handleonChange = (e) =>{
-
         e.preventDefault();
         setGastosParticulares({...gastosParticular,[e.target.name] : e.target.value});
     }
 
-    const NewGasto = async () => {
-
-        AgregarGasto({...gastosParticular, id:uuid()});
-
-        setGastosParticulares({...initialStateValue});
-
-        /*
-        try {
-                //Guardo en Firebase
-                const docRef = await addDoc(collection(db, "gastos"), gastosParticular); //Guardo en la Base de Datos
-                window.alert("Se agrego a la lista a "+ gastosParticular.nombre + "!!");
-
-                setGastosParticulares(gastosParticular);
-
-                //Guardo en Store
-                dispatch(guardarGastos(gastosParticular));
-
-                //Firebase cambio, vuelvo a leer lo que tiene Firebase
-          
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
-*/            
-        
-    }
-
-
     return (
-        <>
-          <h1>App de Gastos</h1>
-            <form className={classes.root} noValidate autoComplete="off">
-                <div>
-                    <TextField required id="standard-required" label="Titulo" defaultValue="" name="titulo" onChange={handleonChange} value={gastosParticular.titulo}/>
-                </div>
-                <div>    
-                    <TextField required id="standard-required" label="Nombre" defaultValue="" name="nombre" onChange={handleonChange} value={gastosParticular.nombre}/>
-                </div>
-                <div>
-                    <TextField required id="standard-required" label="Monto" defaultValue="" name="monto" onChange={handleonChange} value={gastosParticular.monto}/>
-                </div>
-                <div>
-                    <TextField
-                        id="date"
-                        name="fecha"
-                        label="Fecha"
-                        type="date"
-                        defaultValue=""
-                        className={classes.textField}
-                        onChange={handleonChange}
-                        InputLabelProps={{
-                        shrink: true
-                        }}
-                    />
-                </div>
-            </form>
+            <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={(values) => {
+                    // same shape as initial values
+                    console.log("Se envia", values);
 
-            <Button variant="contained" color="primary" onClick={()=>NewGasto()}>
-                Enviar
-            </Button>
-        
-       </>
-        
-    )
+                    console.log("gastosParticular.fecha=",gastosParticular.fecha);
+
+                    AgregarGasto({...values, id:uuid()});
+
+                    setGastosParticulares({...initialValues});
+                  }}
+            >
+                 {({ touched, errors, isSubmitting, handleBlur }) => (
+                <Form>
+ 
+                    <div>
+                        <label htmlFor="Titulo">Titulo</label>
+                        <Field
+                        type="text"
+                        name="titulo"
+                        //value={gastosParticular.titulo}
+                        placeholder="Ingresa el Titulo del Evento"
+                        className={`form-control ${
+                            touched.titulo && errors.titulo ? "is-invalid" : ""
+                        }`}
+                        />
+                        <ErrorMessage
+                        component="div"
+                        name="titulo"
+                        className="invalid-feedback"
+                        />
+                    </div>
+  
+                    <div>
+                        <label htmlFor="nombre">Nombre</label>
+                        <Field
+                        type="text"
+                        name="nombre"
+                        //value={gastosParticular.nombre}
+                        placeholder="Ingresa el Nombre"
+                        className={`form-control ${
+                            touched.nombre && errors.nombre ? "is-invalid" : ""
+                        }`}
+                        />
+                        <ErrorMessage
+                        component="div"
+                        name="nombre"
+                        className="invalid-feedback"
+                        />
+                    </div>
+ 
+                    <div>
+                        <label htmlFor="monto">Monto</label>
+                        <Field
+                        type="number"
+                        name="monto"
+                        //value={gastosParticular.monto}
+                        placeholder="Ingresa el Monto"
+                        className={`form-control ${
+                            touched.monto && errors.monto ? "is-invalid" : ""
+                        }`}
+                        />
+                        <ErrorMessage
+                        component="div"
+                        name="monto"
+                        className="invalid-feedback"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="fecha">Fecha</label>
+                        <Field
+                        type="date"
+                        name="fecha"
+                        defaultValue="2017-05-24"
+                        //value={gastosParticular.monto}
+                        InputLabelProps={{
+                            shrink: true,
+                          }}
+                        className={`form-control ${
+                            touched.fecha && errors.fecha ? "is-invalid" : ""
+                        }`}
+                        />
+                        <ErrorMessage
+                        component="div"
+                        name="fecha"
+                        className="invalid-feedback"
+                        />
+                    </div>
+
+                    <div>
+                    <Button variant="contained"  type="submit" color="primary">Enviar</Button>
+                    </div>
+                </Form>
+                )}            
+  
+            </Formik>
+        )
 }
 
 export default Gastos;

@@ -61,10 +61,16 @@ const Globalcomponente= () =>{
 
         //setTotalPorPersona(total/cantpersonas);devuelve 0,ya que se ejecuta mas rapido,que lo que tarda en armar total y cantperesona 
         //console.log("totalporpersona=", totalporpersona);
-        setTotalPorPersona((citySnapshot.docs.map(doc => Number(doc.data().monto)).reduce(function (previous, current) {
-            return previous + current;
-        }, 0))/(citySnapshot.docs.map(doc => doc.data().monto).length).toFixed(2));
 
+        if ((citySnapshot.docs.map(doc => doc.data().monto).length)===0) {
+            setTotalPorPersona(0);
+        }
+        else
+        {
+            setTotalPorPersona((citySnapshot.docs.map(doc => Number(doc.data().monto)).reduce(function (previous, current) {
+                return previous + current;
+            }, 0))/(citySnapshot.docs.map(doc => doc.data().monto).length).toFixed(2));
+        }
     };
 
 
@@ -126,6 +132,8 @@ const Globalcomponente= () =>{
             monto: registro.monto,
             fecha: registro.fecha,
           });
+
+          window.alert("Se modifico el registro");
 
           LecturaFireBase();
     }
