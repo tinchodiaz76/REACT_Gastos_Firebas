@@ -93,20 +93,17 @@ const Globalcomponente= () =>{
 
     const deleteregister= async (id)=>{
         //Leo lo que tiene Firebase
-        var v_id='';
 
         //Listo todos los documentos que tengan el campo ID, igual al parametro que le paso a la funcion
         const q = query(collection(db, "gastos"), where("id", "==", id));
 
         const querySnapshot = await getDocs(q);
 
-        querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
-        v_id= doc.id;  //Si ponia deleteDoc(doc(db, "gastos", v_id)); no andaba.
+        querySnapshot.forEach(async (docii) => {
+            console.log("docii.id=", docii.data());
+            await deleteDoc(doc(db, "gastos", docii.id));
         });
         
-        await deleteDoc(doc(db, "gastos", v_id));
         window.alert("Se elimino el registro");
 
         LecturaFireBase();
@@ -120,18 +117,19 @@ const Globalcomponente= () =>{
 
         const querySnapshot = await getDocs(q);
 
-        querySnapshot.forEach((doc) => {
-            console.log(doc.id, " => ", doc.data());
-            v_id= doc.id;  //Si ponia deleteDoc(doc(db, "gastos", v_id)); no andaba.
+        querySnapshot.forEach(async (docii) => {
+            console.log(docii.id, " => ", docii.data());
+
+            await updateDoc(doc(db, "gastos", docii.id),{
+                titulo: registro.titulo,
+                nombre: registro.nombre,
+                monto: registro.monto,
+                fecha: registro.fecha,
+              });
         })
 
 
-        await updateDoc(doc(db, "gastos", v_id),{
-            titulo: registro.titulo,
-            nombre: registro.nombre,
-            monto: registro.monto,
-            fecha: registro.fecha,
-          });
+        
 
           window.alert("Se modifico el registro");
 
