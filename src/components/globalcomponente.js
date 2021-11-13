@@ -128,9 +128,6 @@ const Globalcomponente= () =>{
               });
         })
 
-
-        
-
           window.alert("Se modifico el registro");
 
           LecturaFireBase();
