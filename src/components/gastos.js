@@ -53,12 +53,13 @@ const Gastos= ({AgregarGasto}) =>{
     };
 
     const[gastosParticular, setGastosParticulares]= useState(initialValues);
-    /*const[gastosParticular, setGastosParticulares]= useState([]);*/
 
+    /*
     const handleonChange = (e) =>{
         e.preventDefault();
         setGastosParticulares({...gastosParticular,[e.target.name] : e.target.value});
     }
+    */
 
     return (
             <Formik
@@ -84,8 +85,6 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="text"
                         name="titulo"
-                        //defaultValue={gastosParticular.titulo}
-                        //onChange={handleonChange}
                         placeholder="Ingresa el Titulo del Evento"
                         className={`form-control ${
                             touched.titulo && errors.titulo ? "is-invalid" : ""
@@ -103,7 +102,6 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="text"
                         name="nombre"
-                        //defaultValue={gastosParticular.nombre}
                         placeholder="Ingresa el Nombre"
                         className={`form-control ${
                             touched.nombre && errors.nombre ? "is-invalid" : ""
@@ -121,7 +119,6 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="number"
                         name="monto"
-                        //defaultValue={gastosParticular.monto}
                         placeholder="Ingresa el Monto"
                         className={`form-control ${
                             touched.monto && errors.monto ? "is-invalid" : ""
@@ -139,7 +136,6 @@ const Gastos= ({AgregarGasto}) =>{
                         <Field
                         type="date"
                         name="fecha"
-                        //defaultValue={gastosParticular.fecha}
                         InputLabelProps={{
                             shrink: true,
                           }}

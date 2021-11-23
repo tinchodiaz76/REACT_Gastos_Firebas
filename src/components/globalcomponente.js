@@ -110,7 +110,6 @@ const Globalcomponente= () =>{
     }
     
     const modifyregister =async (registro)=> {
-        var v_id='';
         console.log("modifyregister-registro=", registro.id);
  
         const q = query(collection(db, "gastos"), where("id", "==", registro.id));

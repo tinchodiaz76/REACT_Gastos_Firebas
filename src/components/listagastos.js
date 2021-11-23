@@ -18,7 +18,9 @@ import { Delete, AccessAlarm, ThreeDRotation, HourglassEmpty } from '@material-u
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import db from "../firebase";
-//import { collection, addDoc, getDocs, deleteDoc } from "firebase/firestore";
+
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as yup from 'yup'
 
 import { doc, getDoc, deleteDoc, collection, query, where, getDocs} from "firebase/firestore";
 
@@ -59,13 +61,6 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
     const handleShow = () => setShow(true);
     //Se usa para el MODAL
 
-    const handleonChange = (e) =>{
-        e.preventDefault();
-        
-        setGastoModificado({...gastomodificado,[e.target.name] : e.target.value});
-        
-      }
-
     const valorIndividual =(monto)=>{
           return (monto - TotalPorPersona);
     }
@@ -87,16 +82,40 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
     }
 
     const SaveRegister = ()=>{
+      console.log("SaveRegister---->gastomodificado=", gastomodificado);      
       GraboRegistro(gastomodificado);
       handleClose();  //Cierro el Modal
     }
 
+    const validationSchema = yup.object().shape({
+      titulo: yup.string().required("Por favor ingresa el Titulo")
+                          .min(3,"El Titulo debe tener como minimo 2 caracteres")
+                          .max(20,"El Titulo debe tener menos de 20 caracteres"),
+      nombre: yup.string().required("Por favor ingresa el Nombre")
+                          .min(3,"El Nombre debe tener como minimo 2 caracteres")
+                          .max(40,"El Nombre debe tener menos de 40 caracteres"),
+      monto: yup.number().required("Por favor ingresa el Monto")
+                          .min(1,"El Monto no debe ser menor a $1")
+                          .max(99999,"El Monto no debe ser superior a $99999"),
+      fecha: yup.date().required("Por favor ingresa la Fecha")
+    });
+
+
+    const initialValues = {
+      id: gastomodificado.id,
+      titulo: gastomodificado.titulo,
+      nombre: gastomodificado.nombre,
+      monto: gastomodificado.monto,
+      fecha: gastomodificado.fecha,
+      };
+
+
     return (
         <>
+        <div>
             <h2>Total: {MostrarTotal}</h2>
             <h2>Cantidad de Personas: {CantPersonas}</h2>
             <h2>Total por Persona: {TotalPorPersona}</h2>
-            <div>
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
@@ -131,54 +150,122 @@ const Listagastos= ({MostrarGastos,MostrarTotal, CantPersonas,TotalPorPersona, E
               </Table>
             </TableContainer>
         </div>
+                   
         
-               
         <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Agregar Participante</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <form className={classes.root} noValidate autoComplete="off">
-                    <div>
-                        <TextField required id="standard-required" label="IDs"  name="id" defaultValue={gastomodificado.id} onChange={handleonChange} hidden/>
-                    </div>
+        <Formik async
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={(values) => {
+                    //setGastoModificado({...values});
+                    //SaveRegister();
+                    GraboRegistro({...values});
+                    handleClose();  //Cierro el Modal
+                  }}
+            >
+                 {({ touched, errors, isSubmitting, handleBlur }) => (
+          <Form>
+                <Modal.Header closeButton>
+                  <Modal.Title>Agregar Participante</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <form className={classes.root} noValidate autoComplete="off">
+                        <div>
+                            <TextField required id="standard-required" label="IDs"  name="id" defaultValue={gastomodificado.id} hidden/>
+                        </div>
 
-                    <div>
-                        <TextField required id="standard-required" label="Titulo"  name="titulo" defaultValue={gastomodificado.titulo} onChange={handleonChange}/>
-                    </div>
-                    <div>    
-                        <TextField required id="standard-required" label="Nombre"  name="nombre"  defaultValue={gastomodificado.nombre} onChange={handleonChange} />
-                    </div>
-                    <div>
-                        <TextField required id="standard-required" label="Monto" name="monto" defaultValue={gastomodificado.monto} onChange={handleonChange} />
-                    </div>
-                    <div>
-                        <TextField
+                        <div>
+                            <label htmlFor="titulo">Titulo</label>
+                            <Field
+                            type="text"
+                            name="titulo"
+                            defaultValue={gastomodificado.titulo}
+                            className={`form-control ${
+                                touched.titulo && errors.titulo ? "is-invalid" : ""
+                            }`}
+                            />
+                            <ErrorMessage
+                            component="div"
+                            name="titulo"
+                            className="invalid-feedback"
+                            />
+                        </div>
+                         
+                        <div>
+                            <label htmlFor="nombre">Nombre</label>
+                            <Field
+                            type="text"
+                            name="nombre"
+                            defaultValue={gastomodificado.nombre}
+                            className={`form-control ${
+                                touched.nombre && errors.nombre ? "is-invalid" : ""
+                            }`}
+                            />
+                            <ErrorMessage
+                            component="div"
+                            name="nombre"
+                            className="invalid-feedback"
+                            />
+                        </div>
+                  
+                        <div>
+                            <label htmlFor="monto"> Monto</label>
+                            <Field
+                            type="text"
+                            name="monto"
+                            defaultValue={gastomodificado.monto}
+                            className={`form-control ${
+                                touched.monto && errors.monto ? "is-invalid" : ""
+                            }`}
+                            />
+                            <ErrorMessage
+                            component="div"
+                            name="monto"
+                            className="invalid-feedback"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="fecha"> Fecha</label>
+                            <Field
                             id="date"
-                            name="fecha"
-                            label="Birthday"
                             type="date"
+                            name="fecha"
                             defaultValue={gastomodificado.fecha}
-                            className={classes.textField}
-                            onChange={handleonChange}
                             InputLabelProps={{
-                            shrink: true,
-                            }}
-                        />
-                    </div>
-                </form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={()=>handleClose}>
-                Cerrar
-              </Button>
-              <Button variant="primary" onClick={()=>SaveRegister()}>
-                Grabar
-              </Button>
-            </Modal.Footer>
+                              shrink: true,
+                              }}
+                            className={`form-control ${
+                                touched.fecha && errors.fecha ? "is-invalid" : ""
+                            }`}
+                            />
+                            <ErrorMessage
+                            component="div"
+                            name="fecha"
+                            className="invalid-feedback"
+                            />
+                        </div>
+                      
+                    </form>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={()=>handleClose}>
+                    Cerrar
+                  </Button>
+                  <div>
+                  <Button variant="contained"  type="submit" color="primary">Enviar</Button>
+                  </div>
+{/*
+                  <Button variant="primary" onClick={()=>SaveRegister()}>
+                    Grabar
+                  </Button>
+*/}
+                </Modal.Footer>
+          </Form>
+                )}            
+        </Formik>
         </Modal>
         </>
-
     );
 }
 
